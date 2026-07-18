@@ -1,11 +1,11 @@
 /*
-TC - 
-SC - 
-Issues Faced - 
-Solved on LeetCode - 
+TC - O(kN + M), assuming we backtrack a certain number of times for the number of stars present due to mismatches, but even then we are always moving forward and can backtrack only n times
+SC - O(1), no extra space used
+Issues Faced - this one was very challenging. I used a for loop which made state tracking more tricky, was overengineering edge-cases from the get-go, and completely missed the idea of backtracking here because I was so focused on making it a pure greedy, math kind of solution. Intuition building for such problems needs to improve.
+Leetcode Run - yes!
+
 
 */
-
 
 class Solution {
     public:
@@ -15,30 +15,40 @@ class Solution {
     
             int m = p.size();
     
-            int j = 0; //this will move through string s
+            int i = 0; //this will move through string s
     
-            for (int i = 0; i < m ; i++) {
-                //iterate over the pattern, and keep cutting through the string
+            int j = 0; //this will move through pattern p
     
-                if (p[i] == '*') {
+            int starIdx = -1; //points to the most recent star I have seen (initialized to -1)
     
-                } else if (p[i] == '?') {
-                    if (j >= n) { //pattern still remaining but ran out of string to match to (? cannot match with empty string)
-                        return false;
-                    } else {
-                        j += 1; //? always matches a single char
-                    }
+            int matchIdx = -1; //the index in string s where that * started matching
     
+            while (i < n) {
+                if (j < m && (p[j] == '?' || p[j] == s[i])) {
+                    j += 1;
+                    i += 1;
+                } else if (j < m && p[j] == '*') {
+                    starIdx = j;
+                    matchIdx = i; //I start matching the star from here
+                    j += 1;
                 } else {
-                    if (j >= n) { //pattern still remaining but ran out of string to match to
+                    //if no checkpoint, THEN return false
+                    if (matchIdx == -1) {
                         return false;
-                    } else if (p[i] != s[j]) { //string still remaining but does not match
-                        return false;
-                    } else { //advance ahead in the string
-                        j += 1;
                     }
+                    //rollback to checkpoint
+                    i = matchIdx + 1;
+                    matchIdx = i;//save it as one step forward that we matched
+                    j = starIdx + 1;//skip the star, because this time also we have matched and finished with it, just one more char has been taken but we are done with it
                 }
+    
             }
+    
+            while (j < m && p[j] == '*') {
+                j += 1;
+            }
+    
+            return j == m;
             
         }
     };
